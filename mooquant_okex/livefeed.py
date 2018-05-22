@@ -1,4 +1,4 @@
-# MooQuant BitFinex module
+# MooQuant OkEx module
 #
 # Copyright 2011-2015 Gabriel Martin Becedillas Ruiz
 #
@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Modified from MooQuant bitfinex and Xignite modules
+# Modified from MooQuant okex and Xignite modules
 
 """
 .. moduleauthor:: Mikko Gozalo <mikgozalo@gmail.com>
@@ -29,7 +29,7 @@ from mooquant import bar, barfeed, dataseries, logger, observer
 from mooquant.utils import dt
 from mooquant_okex import api
 
-logger = logger.getLogger("bitfinex")
+logger = logger.getLogger("okex")
 
 
 def utcnow():
@@ -68,13 +68,7 @@ class TradeBar(bar.Bar):
         ) = state
 
     def __getstate__(self):
-        return (
-            self.__dateTime,
-            self.__tradeId,
-            self.__price,
-            self.__amount,
-            self.__type
-        )
+        return self.__dateTime, self.__tradeId, self.__price, self.__amount, self.__type
 
     def setUseAdjustedValue(self, useAdjusted):
         if useAdjusted:
@@ -146,7 +140,7 @@ class PollingThread(threading.Thread):
                     self.doCall()
                 except Exception as e:
                     logger.critical("Unhandled exception", exc_info=e)
-        
+
         logger.debug("Thread finished.")
 
     # Must return a non-naive datetime.
@@ -182,23 +176,25 @@ class TradesAPIThread(PollingThread):
             try:
                 trades = api.get_trades(identifier)
                 trades.reverse()
+
                 for barDict in trades:
                     bar = {}
                     trade = TradeBar(barDict)
                     bar[identifier] = trade
                     tid = trade.getTradeId()
+
                     if tid > self.last_tid:
                         self.last_tid = tid
                         self.__queue.put((
                             TradesAPIThread.ON_TRADE, bar
                         ))
+
                 orders = api.get_orderbook(identifier)
+
                 if len(orders['bids']) and len(orders['asks']):
                     best_ask = orders['asks'][0]
                     best_bid = orders['bids'][0]
-                    last_update = int(max(
-                        float(best_ask['timestamp']), float(best_bid['timestamp'])
-                    ))
+                    last_update = int(max(float(best_ask['timestamp']), float(best_bid['timestamp'])))
 
                     if last_update > self.last_orderbook_ts:
                         self.last_orderbook_ts = last_update
@@ -209,7 +205,7 @@ class TradesAPIThread(PollingThread):
                                 'ask': float(best_ask['price'])
                             }
                         ))
-            except api.BitfinexError as e:
+            except api.OkExError as e:
                 logger.error(e)
 
 
@@ -217,15 +213,11 @@ class LiveFeed(barfeed.BaseBarFeed):
 
     QUEUE_TIMEOUT = 0.01
 
-    def __init__(
-            self,
-            identifiers,
-            apiCallDelay=5,
-            maxLen=dataseries.DEFAULT_MAX_LEN
-    ):
+    def __init__(self, identifiers, apiCallDelay=5,
+                 maxLen=dataseries.DEFAULT_MAX_LEN):
         logger.info('Livefeed created')
         barfeed.BaseBarFeed.__init__(self, bar.Frequency.TRADE, maxLen)
-        
+
         if not isinstance(identifiers, list):
             raise Exception("identifiers must be a list")
 
@@ -270,20 +262,21 @@ class LiveFeed(barfeed.BaseBarFeed):
 
     def dispatch(self):
         ret = False
-        
+
         if self.__dispatchImpl(None):
             ret = True
 
         if barfeed.BaseBarFeed.dispatch(self):
             ret = True
-        
+
         return ret
 
     def __dispatchImpl(self, eventFilter):
         ret = False
 
         try:
-            eventType, eventData = self.__queue.get(True, LiveFeed.QUEUE_TIMEOUT)
+            eventType, eventData = self.__queue.get(
+                True, LiveFeed.QUEUE_TIMEOUT)
 
             if eventFilter is not None and eventType not in eventFilter:
                 return False
@@ -312,7 +305,7 @@ class LiveFeed(barfeed.BaseBarFeed):
     def getNextBars(self):
         if len(self.__bars):
             return bar.Bars(self.__bars.pop(0))
-        
+
         return None
 
     def getOrderBookUpdateEvent(self):

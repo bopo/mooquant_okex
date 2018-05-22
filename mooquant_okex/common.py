@@ -1,4 +1,4 @@
-# MooQuant BitFinex module
+# MooQuant OkEx module
 #
 # Copyright 2011-2015 Gabriel Martin Becedillas Ruiz
 #
@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Modified from MooQuant Bitfinex and Xignite modules
+# Modified from MooQuant OkEx and Xignite modules
 
 """
 .. moduleauthor:: Mikko Gozalo <mikgozalo@gmail.com>
@@ -24,7 +24,7 @@ import mooquant.logger
 from mooquant import broker
 
 btc_symbol = "btcusd"
-logger = mooquant.logger.getLogger("bitfinex")
+logger = mooquant.logger.getLogger("okex")
 
 
 class BTCTraits(broker.InstrumentTraits):

@@ -13,19 +13,19 @@ from mooquant_okex import __version__
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-requirements = ['mooquant',]
-test_requirements = ['mooquant', 'pytest',]
-setup_requirements = ['mooquant',]
+requirements = ['mooquant', ]
+test_requirements = ['mooquant', 'pytest', ]
+setup_requirements = ['mooquant', ]
 
 setup(
     name='mooquant_okex',
     version=__version__,
-    description="mooquant bitfinex module",
+    description="mooquant okex module",
     long_description=readme + '\n\n',
     author="bopo.wang",
     author_email='ibopo@126.com',
     url='https://github.com/bopo/mooquant_okex',
-    packages=find_packages(include=['mooquant_okex','mooquant_okex.*']),
+    packages=find_packages(include=['mooquant_okex', 'mooquant_okex.*']),
     include_package_data=True,
     install_requires=requirements,
     license="MIT license",

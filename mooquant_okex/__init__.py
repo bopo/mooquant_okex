@@ -1,4 +1,4 @@
-# PyAlgoTrade BitFinex module
+# PyAlgoTrade OkEx module
 #
 # Copyright 2011-2015 Gabriel Martin Becedillas Ruiz
 #
@@ -19,4 +19,4 @@
 """
 .. moduleauthor:: Mikko Gozalo <mikgozalo@gmail.com>
 """
-__version__ = '0.1.1'
+__version__ = '0.1.2'

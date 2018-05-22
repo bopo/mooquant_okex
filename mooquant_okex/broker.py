@@ -1,4 +1,4 @@
-# MooQuant BitFinex module
+# MooQuant OkEx module
 #
 # Copyright 2011-2015 Gabriel Martin Becedillas Ruiz
 #
@@ -29,7 +29,7 @@ from mooquant_okex import common
 class BacktestingBroker(backtesting.Broker):
     MIN_TRADE_USD = 5
 
-    """A Bitfinex backtesting broker.
+    """A OkEx backtesting broker.
 
     :param cash: The initial amount of cash.
     :type cash: int/float.
@@ -54,9 +54,10 @@ class BacktestingBroker(backtesting.Broker):
 
     def submitOrder(self, order):
         if order.isInitial():
-            # Override user settings based on Bitfinex limitations.
+            # Override user settings based on OkEx limitations.
             order.setAllOrNone(False)
             order.setGoodTillCanceled(True)
+        
         return backtesting.Broker.submitOrder(self, order)
 
     def createMarketOrder(self, action, instrument, quantity, onClose=False):
@@ -72,7 +73,9 @@ class BacktestingBroker(backtesting.Broker):
             action = broker.Order.Action.SELL
 
         if limitPrice * quantity < BacktestingBroker.MIN_TRADE_USD:
-            raise Exception("Trade must be >= %s" % (BacktestingBroker.MIN_TRADE_USD))
+            raise Exception(
+                "Trade must be >= %s" %
+                (BacktestingBroker.MIN_TRADE_USD))
 
         if action == broker.Order.Action.BUY:
             # Check that there is enough cash.
@@ -87,7 +90,8 @@ class BacktestingBroker(backtesting.Broker):
         else:
             raise Exception("Only BUY/SELL orders are supported")
 
-        return backtesting.Broker.createLimitOrder(self, action, instrument, limitPrice, quantity)
+        return backtesting.Broker.createLimitOrder(
+            self, action, instrument, limitPrice, quantity)
 
     def createStopOrder(self, action, instrument, stopPrice, quantity):
         raise Exception("Stop orders are not supported")
@@ -97,7 +101,7 @@ class BacktestingBroker(backtesting.Broker):
 
 
 class PaperTradingBroker(BacktestingBroker):
-    """A Bitfinex paper trading broker.
+    """A OkEx paper trading broker.
 
     :param cash: The initial amount of cash.
     :type cash: int/float.

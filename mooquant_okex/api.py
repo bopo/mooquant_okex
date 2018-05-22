@@ -1,4 +1,4 @@
-# PyAlgoTrade BitFinex module
+# PyAlgoTrade OkEx module
 #
 # Copyright 2011-2015 Gabriel Martin Becedillas Ruiz
 #
@@ -20,40 +20,36 @@
 .. moduleauthor:: Mikko Gozalo <mikgozalo@gmail.com>
 """
 
-import json
-import urllib.error
-import urllib.parse
-import urllib.request
+import requests
 
 
-class BitfinexError(Exception):
+class OkExError(Exception):
     def __init__(self, message, response):
         Exception.__init__(self, message)
 
 
 def json_http_request(url):
-    f = urllib.request.urlopen(url)
-    response = f.read()
-    return json.loads(response)
+    response = requests.get(url)
+    return response.json()
 
 
 def get_trades(currency_pair):
-    url = "https://api.bitfinex.com/v1/trades/{}".format(currency_pair)
-    
+    url = "https://www.okex.com/api/v1/trades.do?symbol={}".format(currency_pair)
+
     try:
         ret = json_http_request(url)
-    except:
-        raise BitfinexError('Problem fetching trades')
-    
+    except BaseException:
+        raise OkExError('Problem fetching trades')
+
     return ret
 
 
 def get_orderbook(currency_pair):
-    url = "https://api.bitfinex.com/v1/book/{}".format(currency_pair)
-    
+    url = "https://api.okex.com/v1/book/{}".format(currency_pair)
+
     try:
         ret = json_http_request(url)
-    except:
-        raise BitfinexError('Problem fetching trades')
-    
+    except BaseException:
+        raise OkExError('Problem fetching trades')
+
     return ret
